@@ -1,0 +1,13 @@
+instructions : 
+download from github repository
+install dependancies : apt install libpcre3-dev (required by swig),
+                                    build-essential for g++ (required by swig)
+                        tar xvfz swig (official site)
+                        ./configure > make > sudo make install
+
+                        SoX (audio conversion)
+                        PortAudio or PyAudio (audio capturing)
+                        ATLAS or OpenBLAS (matrix computation)
+you are done.
+cd swig
+make

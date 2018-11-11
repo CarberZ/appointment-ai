@@ -9,7 +9,7 @@ sources from this project is :
 
 **for STT / Speech to text**
 speech_recognition library, used to translate speech to text
-
+snowboy, for custom hotword detection
 pyAudio, used to allow the app to use microphone.
 
 **for TTS / Text to speech**

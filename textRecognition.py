@@ -12,7 +12,6 @@ allMics = sr.Microphone.list_microphone_names()
 # some initializers
 blue_snowBall = 0
 duration = 0.5  # this is an optional argument for the duration of the record task
-language = 'fr-FR'
 
 # get index from micList
 for i, item in enumerate(allMics):
@@ -39,7 +38,8 @@ with bl as source:
 def record_audio():
     # Record Audio
     with mic as source:
-        print("Say something!")
+        print('i listen')
+        r.adjust_for_ambient_noise(source, .5)
         audio = r.listen(source)
 
     # Speech recognition using Google Speech Recognition
@@ -47,11 +47,10 @@ def record_audio():
     try:
         # Uses the default API key
         # To use another API key: `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-        data = r.recognize_google(audio)
+        data = r.recognize_google(audio, language='fr-FR')
         print("You said: " + data)
     except sr.UnknownValueError:
         print("Google Speech Recognition could not understand audio")
-        speak("I haven't understand what you said.")
     except sr.RequestError as e:
         print("Could not request results from Google Speech Recognition service; {0}".format(e))
 
@@ -60,17 +59,17 @@ def record_audio():
 
 def speak(audiostring):
     print(audiostring)
-    tts = gTTS(audiostring)
+    tts = gTTS(audiostring, 'fr')
     tts.save("audio.mp3")
     os.system("mpg123 audio.mp3")
 
 
 def jarvis(data):
-    if "how are you" in data:
-        speak("I am fine")
+    if "comment ça va" in data:
+        speak("ça va bien.")
 
-    if "what time is it" in data:
-        speak('it is ' + time.strftime('%I') + time.strftime('%P') + ' and ' + time.strftime('%M'))
+    if "quelle heure est-il" in data:
+        speak('il est ' + time.strftime('%-H') + ' heure ' + time.strftime('%M'))
 
     if "what microphone are you using" in data:
         if "Snowball" in allMics[blue_snowBall]:
@@ -87,7 +86,7 @@ def jarvis(data):
 
 # process
 time.sleep(2)
-speak("Hi, what can i do for you ?")
+speak("Salut, qu'est-ce que je peux faire pour toi ?")
 while 1:
     data = record_audio()
     jarvis(data)
