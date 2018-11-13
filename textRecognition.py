@@ -3,6 +3,13 @@ from gtts import gTTS   # Text to speech
 from time import ctime
 import time
 import os
+'''
+imports for snowboy
+'''
+import snowboydecoder
+import sys
+import signal
+
 
 r = sr.Recognizer()
 
@@ -11,7 +18,7 @@ allMics = sr.Microphone.list_microphone_names()
 
 # some initializers
 blue_snowBall = 0
-duration = 0.5  # this is an optional argument for the duration of the record task
+duration = 0.5  # this is used to calibrate mic if room is noisy
 
 # get index from micList
 for i, item in enumerate(allMics):
@@ -20,33 +27,20 @@ for i, item in enumerate(allMics):
         break
 
 # set mic just found
-
 mic = sr.Microphone(blue_snowBall)
 
-# this is how audio is catched from a recorded wave file
-'''
-bl = sr.AudioFile('bodyLanguage.wav')
-with bl as source:
-    # if there is noise , calibrate and record
-    r.adjust_for_ambient_noise(source, duration)
-    audio = r.record(source)
-'''
-
-# we can do the same with mic, records stops automaticly when silent is detected
-
+# records stops automaticly when silent is detected
 
 def record_audio():
     # Record Audio
     with mic as source:
-        print('i listen')
-        r.adjust_for_ambient_noise(source, .5)
+        print('Cloé listen')
+        # r.adjust_for_ambient_noise(source, .5) // if needed for noisy room
         audio = r.listen(source)
 
     # Speech recognition using Google Speech Recognition
     data = ""
     try:
-        # Uses the default API key
-        # To use another API key: `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
         data = r.recognize_google(audio, language='fr-FR')
         print("You said: " + data)
     except sr.UnknownValueError:
@@ -64,30 +58,46 @@ def speak(audiostring):
     os.system("mpg123 audio.mp3")
 
 
-def jarvis(data):
-    if "comment ça va" in data:
+def cloe(audioSource):
+    if "comment ça va" in audioSource:
         speak("ça va bien.")
 
-    if "quelle heure est-il" in data:
+    if "quelle heure est-il" in audioSource:
         speak('il est ' + time.strftime('%-H') + ' heure ' + time.strftime('%M'))
 
-    if "what microphone are you using" in data:
+    if "quel micro utilises-tu" in audioSource:
         if "Snowball" in allMics[blue_snowBall]:
-            speak("I am using the Blue Snowball microphone.")
+            speak("J'utilise le Blue Snowball microphone.")
         else:
-            speak("i don't know what microphone i use.")
-
-    if "where is" in data:
-        data = data.split(" ")
-        location = data[2]
-        speak("Hold on, I will show you where " + location + " is.")
-        os.system("chromium-browser https://www.google.nl/maps/place/" + location + "/&amp;")
+            speak("Je ne sais pas quel microphone j'utilise.")
 
 
-# process
-time.sleep(2)
-speak("Salut, qu'est-ce que je peux faire pour toi ?")
-while 1:
-    data = record_audio()
-    jarvis(data)
+'''
+SNOWBOY ENGINE
+'''
+interrupted = False
 
+
+def signal_handler(signal, frame):
+    global interrupted
+    interrupted = True
+
+
+def interrupt_callback():
+    global interrupted
+    return interrupted
+
+model = 'Cloé.pmdl'
+
+# capture SIGINT signal, e.g., Ctrl+C
+signal.signal(signal.SIGINT, signal_handler)
+
+detector = snowboydecoder.HotwordDetector(model, sensitivity=0.5)
+print('Listening... Press Ctrl+C to exit')
+
+# main loop
+detector.start(detected_callback=snowboydecoder.play_audio_file,
+               interrupt_check=interrupt_callback,
+               sleep_time=0.03)
+
+detector.terminate()

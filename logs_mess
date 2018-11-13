@@ -1,0 +1,8 @@
+# this is how audio is catched from a recorded wave file
+'''
+bl = sr.AudioFile('bodyLanguage.wav')
+with bl as source:
+    # if there is noise , calibrate and record
+    r.adjust_for_ambient_noise(source, duration)
+    audio = r.record(source)
+'''
