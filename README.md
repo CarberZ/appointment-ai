@@ -1,8 +1,8 @@
 This is a little project to handles appointments from user to a simple machine in python
 We can wake the machine by keywords, create an appointment by speaking to it
 
-The machine could retrieve appointments by email / text message if the user is not at home
-and by speaking back to him if he is in the same room.
+The machine can retrieve appointments by email or text message if the user is not at home, 
+and speak out the appointments when user come back.
 
 
 sources from this project is : 
